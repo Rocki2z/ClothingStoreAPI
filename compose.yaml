@@ -1,0 +1,51 @@
+
+services:
+
+  # PostgreSQL database
+  db:
+    image: postgres:17
+    container_name: clothingstore-db
+    restart: unless-stopped
+
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+
+    ports:
+      - "5433:5432"
+
+    volumes:
+      - clothingstore-data:/var/lib/postgresql/data
+
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # ASP.NET Core API
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+
+    container_name: clothingstore-api
+    restart: unless-stopped
+
+    ports:
+      - "5102:8080"
+
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_HTTP_PORTS: 8080
+      Jwt__Key: ${JWT_KEY:?Set JWT_KEY in .env}
+
+      ConnectionStrings__DefaultConnection: "Host=db;Port=5432;Database=${POSTGRES_DB};Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD}"
+
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  clothingstore-data:

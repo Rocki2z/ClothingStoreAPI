@@ -9,3 +9,6 @@ obj/
 
 ## Local configuration
 appsettings.Local.json
+.env
+.env.*
+!.env.example

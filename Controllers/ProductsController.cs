@@ -2,9 +2,11 @@ using ClothingStoreAPI.DTOs;
 using ClothingStoreAPI.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 
 namespace ClothingStoreAPI.Controllers;
 
+[Authorize]
 [ApiController]
 [Route("api/[controller]")]
 public class ProductsController : ControllerBase
@@ -47,6 +49,7 @@ public class ProductsController : ControllerBase
     }
 
     // POST: api/products
+    [Authorize(Roles = "Admin")]
     [HttpPost]
     public async Task<ActionResult<ProductResponseDto>> Create(
         CreateProductDto dto,
